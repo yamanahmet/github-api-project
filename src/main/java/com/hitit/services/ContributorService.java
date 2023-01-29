@@ -2,6 +2,7 @@ package com.hitit.services;
 
 import com.hitit.dto.Contributors;
 import com.hitit.dto.Users;
+import org.apache.catalina.User;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,12 +37,16 @@ public class ContributorService {
                 new ParameterizedTypeReference<List<Contributors>>(){});
 
         List<Contributors> result = response.getBody();
-        Users user;
-        for (Contributors contributors : result.stream().limit(5).collect(Collectors.toList())){
-            user = findUser(contributors.getLogin());
-            user.setContributions(contributors.getContributions());
-            System.out.println(user);
-        }
+
+        List<Users> UserList = result.stream()
+                .limit(5)
+                .map(contributors -> {
+                    Users user = findUser(contributors.getLogin());
+                    user.setContributions(contributors.getContributions());
+                    return user;
+                })
+                .peek(System.out::println)
+                .collect(Collectors.toList());
 
         return result;
     }
