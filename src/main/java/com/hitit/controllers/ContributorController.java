@@ -1,5 +1,6 @@
 package com.hitit.controllers;
 
+import com.hitit.GithubApiProjectApplication;
 import com.hitit.dto.Contributors;
 import com.hitit.services.ContributorService;
 import lombok.RequiredArgsConstructor;

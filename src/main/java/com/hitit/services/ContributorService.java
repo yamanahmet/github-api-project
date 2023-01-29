@@ -1,5 +1,6 @@
 package com.hitit.services;
 
+import com.hitit.GithubApiProjectApplication;
 import com.hitit.dto.Contributors;
 import com.hitit.dto.Users;
 import org.apache.catalina.User;
@@ -20,6 +21,8 @@ public class ContributorService {
     private final WebClient webClient;
     private final String APACHE_URI = "https://api.github.com/repos/apache/echarts";
     private final String GITHUB_URI = "https://api.github.com/users/";
+
+//    private GithubApiProjectApplication githubApiProjectApplication;
 
     public ContributorService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("https://api.github.com/repos/apache/echarts").build();  //{echarts, superset, dubbo, spark, airflow}
@@ -43,6 +46,7 @@ public class ContributorService {
                 .map(contributors -> {
                     Users user = findUser(contributors.getLogin());
                     user.setContributions(contributors.getContributions());
+//                    githubApiProjectApplication.write(APACHE_URI, user.getClass().isArray());
                     return user;
                 })
                 .peek(System.out::println)
@@ -68,8 +72,9 @@ public class ContributorService {
                 new ParameterizedTypeReference<Users>(){});
 
         Users result = response.getBody();
-        return result;
 
+//        githubApiProjectApplication.write(APACHE_URI, (List<Users>) findUser("pissang"));
+        return result;
     }
 
 
