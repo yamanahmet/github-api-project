@@ -17,51 +17,40 @@ import java.util.stream.Collectors;
 
 @Service
 public class ContributorService {
-
     private final String APACHE_URI = "https://api.github.com/repos/apache/";
     private final String GITHUB_URI = "https://api.github.com/users/";
-    private final String[] REPO_NAME = {"echarts", "superset", "dubbo", "spark", "airflow"};
 
-    public List<List<Contributors>> findContributors() {
+    //A method to find and write top contributors for a list of repositories
+    public List<List<Contributors>> findAndWriteTopContributors(String[] repoNames, int top) {
         RestTemplate restTemplate = new RestTemplate();
         List<List<Contributors>> resultAll = new ArrayList<>();
-        for (String repoName : REPO_NAME) {
+        for (String repoName : repoNames) {
+            //Make a GET request to the repository's contributors endpoint using RestTemplate
             ResponseEntity<List<Contributors>> response =
                     restTemplate.exchange(
                             APACHE_URI + repoName + "/contributors", HttpMethod.GET, null,
                             new ParameterizedTypeReference<List<Contributors>>() {
                             });
-
+            //Get the list of contributors from the response
             List<Contributors> result = response.getBody();
-
+            //Map the contributors list to a list of Users, setting their contributions
             List<Users> userList = result.stream()
-                    .limit(5)
+                    .limit(top)
                     .map(contributors -> {
                         Users user = findUser(contributors.getLogin());
                         user.setContributions(contributors.getContributions());
                         return user;
                     })
                     .collect(Collectors.toList());
-
-            BufferedWriter writer = null;
-            try {
-                writer = new BufferedWriter(new FileWriter("test.txt", true));
-                for (Users user : userList) {
-                    String line = "repo: " + repoName + ", user: " + user.getLogin() + ", location: " + user.getLocation() + ", company: " + user.getCompany() + ", contributions: " + user.getContributions() + "\n";
-                    writer.append(line);
-                    System.out.println(line);
-                }
-                writer.close();
-                System.out.println("Successfully wrote to the file.");
-            } catch (IOException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
-            }
+            //Write the top contributors to a file
+            writeTopContributorsToFile(repoName, userList);
+            //Add the contributors list to the overall results list
             resultAll.add(result);
         }
         return resultAll;
     }
 
+    //A method to find a user on GitHub by username
     private Users findUser(String username) {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Users> response = restTemplate.exchange(
@@ -69,7 +58,28 @@ public class ContributorService {
                 new ParameterizedTypeReference<Users>() {
                 });
 
-        Users result = response.getBody();
-        return result;
+        return response.getBody();
+    }
+
+    //A method to write the top contributors for a repository to a file
+    private void writeTopContributorsToFile(String repoName, List<Users> users) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("file.txt", true))) {
+            //Transform the list of Users to a list of strings
+            users.stream()
+                    .map(user -> "repo: " + repoName + ", user: " + user.getLogin() + ", location: " + user.getLocation() + ", company: " + user.getCompany() + ", contributions: " + user.getContributions() + "\n")
+                    .forEach(line -> {
+                        try {
+                            //Write each line to the file
+                            writer.append(line);
+                            System.out.println(line);
+                        } catch (IOException e) {
+                            System.out.println("An error occurred.");
+                            e.printStackTrace();
+                        }
+                    });
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 }
