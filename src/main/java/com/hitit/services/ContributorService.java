@@ -18,15 +18,16 @@ import java.util.stream.Collectors;
 @Service
 public class ContributorService {
 
-    private final WebClient webClient;
-    private final String APACHE_URI = "https://api.github.com/repos/apache/echarts";
+//    private final WebClient webClient;
+    private final String APACHE_URI = "https://api.github.com/repos/apache/"; //https://api.github.com/repos/apache/echarts
+    private final String[] REPO_NAME = {"echarts", "superset", "dubbo", "spark", "airflow"};
     private final String GITHUB_URI = "https://api.github.com/users/";
 
 //    private GithubApiProjectApplication githubApiProjectApplication;
 
-    public ContributorService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://api.github.com/repos/apache/echarts").build();  //{echarts, superset, dubbo, spark, airflow}
-    }
+//    public ContributorService(WebClient.Builder webClientBuilder) {
+//        this.webClient = webClientBuilder.baseUrl("https://api.github.com/repos/apache/echarts").build();  //{echarts, superset, dubbo, spark, airflow}
+//    }
 
 //    public Flux<Contributors> findContributors(){
 //        return this.webClient.get().uri("/contributors")
@@ -35,13 +36,14 @@ public class ContributorService {
 //    }
     public List<Contributors> findContributors(){
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<List<Contributors>> response = restTemplate.exchange(
-                APACHE_URI + "/contributors", HttpMethod.GET, null,
+        ResponseEntity<List<Contributors>> response =
+                restTemplate.exchange(
+                APACHE_URI + REPO_NAME[0] + "/contributors", HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<Contributors>>(){});
 
         List<Contributors> result = response.getBody();
 
-        List<Users> UserList = result.stream()
+        List<Users> userList = result.stream()
                 .limit(5)
                 .map(contributors -> {
                     Users user = findUser(contributors.getLogin());
@@ -49,9 +51,9 @@ public class ContributorService {
 //                    githubApiProjectApplication.write(APACHE_URI, user.getClass().isArray());
                     return user;
                 })
-                .peek(System.out::println)
+                .peek(System.out::println)  //System.out::println
                 .collect(Collectors.toList());
-
+        System.out.println(userList.get(1));
         return result;
     }
 
