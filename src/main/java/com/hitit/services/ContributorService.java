@@ -12,6 +12,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,13 +39,13 @@ public class ContributorService {
 //                .retrieve()
 //                .bodyToFlux(Contributors.class);
 //    }
-    public List<List<Contributors>> findContributors() {
+    public List<List<Contributors>> findContributors(){
         RestTemplate restTemplate = new RestTemplate();
         List<List<Contributors>> resultAll = new ArrayList<>();
-        for (String value : REPO_NAME) {
+        for (String repoName : REPO_NAME) {
             ResponseEntity<List<Contributors>> response =
                     restTemplate.exchange(
-                            APACHE_URI + value + "/contributors", HttpMethod.GET, null,
+                            APACHE_URI + repoName + "/contributors", HttpMethod.GET, null,
                             new ParameterizedTypeReference<List<Contributors>>() {
                             });
 
@@ -58,16 +61,30 @@ public class ContributorService {
                     })
 //                .peek(System.out::println)
                     .collect(Collectors.toList());
-            for (Users user : userList) {
-                System.out.println("repo: " + value + ", user: " + user.getLogin() + ", location: " + user.getLocation() + ", company: " + user.getCompany() + ", contributions: " + user.getContributions());
+            BufferedWriter writer = null;
+            try {
+                writer = new BufferedWriter(new FileWriter("test.txt", true));
+                for (Users user : userList) {
+                    String line = "repo: " + repoName + ", user: " + user.getLogin() + ", location: " + user.getLocation() + ", company: " + user.getCompany() + ", contributions: " + user.getContributions() + "\n";
+                    writer.append(line);
+                    System.out.println(line);
+                }
+                writer.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
             resultAll.add(result);
         }
         try {
-            if (CollectionUtils.isEmpty(resultAll)) {
-//                return
-                // Error resultAll
-            }
+//            if (CollectionUtils.isEmpty(resultAll)) {
+//                FileWriter myWriter = new FileWriter("C:\\Users\\ayaman\\Downloads\\users.txt");
+//                for (List<Contributors> contributors : resultAll) {
+//                     myWriter.append(contributors.toString());
+//                }
+//                myWriter.close();
+////                return
+//                // Error resultAll
+//            }
 // write txt
             // OK
             return resultAll;
