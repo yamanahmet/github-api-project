@@ -14,7 +14,7 @@ public class GithubApiProjectApplication {
 		final String[] repoNames = {"echarts", "superset", "dubbo", "spark", "airflow"};
 		SpringApplication.run(GithubApiProjectApplication.class, args);
 		final ContributorService contributorService = new ContributorService();
-		//Find and write the top 5 contributors for each repository
-		contributorService.findAndWriteTopContributors(repoNames, 5);
+		//Find and write the top 10 contributors for each repository
+		contributorService.findAndWriteTopContributors(repoNames, 10);
 	}
 }

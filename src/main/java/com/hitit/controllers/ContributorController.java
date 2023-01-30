@@ -23,6 +23,6 @@ public class ContributorController {
     @GetMapping(value = "/contributors", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<List<List<Contributors>>> findAllContributors() {
-        return ResponseEntity.ok(contributorService.findAndWriteTopContributors(repoNames, 5));
+        return ResponseEntity.ok(contributorService.findAndWriteTopContributors(repoNames, 10));
     }
 }
